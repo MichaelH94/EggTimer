@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     SeekBar timerSeekBar;
     Boolean counterIsActive = false;
     Button goButton;
+    CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,22 +51,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void buttonClicked(View view) {
 
-        counterIsActive = true;
-        timerSeekBar.setEnabled(false);
-        goButton.setText("STOP");
+        if(counterIsActive) {
+            resetTimer();
+        } else {
 
-        CountDownTimer countDownTimer = new CountDownTimer(timerSeekBar.getProgress() * 1000, 1000) {
-            @Override
-            public void onTick(long l) {
-                updateTimer((int) l / 1000);
-            }
+            counterIsActive = true;
+            timerSeekBar.setEnabled(false);
+            goButton.setText("STOP");
 
-            @Override
-            public void onFinish() {
-                MediaPlayer mplayer = MediaPlayer.create(getApplicationContext(),R.raw.airhorn);
-                mplayer.start();
-            }
-        }.start();
+            countDownTimer = new CountDownTimer(timerSeekBar.getProgress() * 1000, 1000) {
+                @Override
+                public void onTick(long l) {
+                    updateTimer((int) l / 1000);
+                }
+
+                @Override
+                public void onFinish() {
+                    MediaPlayer mplayer = MediaPlayer.create(getApplicationContext(),R.raw.airhorn);
+                    mplayer.start();
+                    resetTimer();
+                }
+            }.start();
+        }
+
+
     }
 
     public void updateTimer(int secondsLeft) {
@@ -79,5 +88,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         timerTextView.setText(Integer.toString(minutes) + ":" + secondString);
+    }
+
+    public void resetTimer() {
+        timerTextView.setText("0:30");
+        timerSeekBar.setProgress(30);
+        timerSeekBar.setEnabled(true);
+        countDownTimer.cancel();
+        goButton.setText("GO");
+        counterIsActive = false;
     }
 }
